@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <!-- empêche la mise en cache du HTML : la page recharge toujours la dernière version (CSS/JS versionnés) -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Steven Dieu, Portfolio jouable</title>
+  <meta name="description" content="Le portfolio de Steven Dieu, Tech Lead Java/Angular nantais, sous forme de mini-jeu de plateforme. Déplace le personnage et attrape les projets !" />
+  <meta name="theme-color" content="#1a1033" />
+  <link rel="icon" type="image/png" href="assets/orbs/orbe.png?b=1" />
+  <link rel="canonical" href="https://stediconsulting.fr/" />
+
+  <!-- Référencement social : aperçu riche au partage (LinkedIn, WhatsApp, Slack, Facebook…) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Steven Dieu, portfolio jouable" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:url" content="https://stediconsulting.fr/" />
+  <meta property="og:title" content="Steven Dieu, portfolio jouable" />
+  <meta property="og:description" content="Le portfolio de Steven Dieu, Tech Lead Java/Angular nantais, sous forme de mini-jeu de plateforme. Déplace le personnage et attrape les projets !" />
+  <meta property="og:image" content="https://stediconsulting.fr/assets/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Un esprit-lumière contemple un monde peint chaleureux : tour Eiffel, lucioles et villes au crépuscule doré." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Steven Dieu, portfolio jouable" />
+  <meta name="twitter:description" content="Mon portfolio sous forme de mini-jeu de plateforme : déplace le personnage et attrape les projets !" />
+  <meta name="twitter:image" content="https://stediconsulting.fr/assets/og-image.jpg" />
+
+  <!-- Polices : définies après la synthèse créative -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..900&family=Quicksand:wght@400;500;600;700&family=Cinzel:wght@400;500;600;700;800;900&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css?b=249" />
+
+  <!-- Données structurées : Google comprend que cette page représente Steven Dieu -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Steven Dieu",
+    "jobTitle": "Tech Lead Java / Angular",
+    "url": "https://stediconsulting.fr/",
+    "image": "https://stediconsulting.fr/assets/og-image.jpg",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Nantes",
+      "addressCountry": "FR"
+    },
+    "email": "mailto:sdieu@stediconsulting.fr",
+    "knowsAbout": ["Java", "Angular", "Spring Boot", "TypeScript", "Node.js", "Symfony", "WordPress", "Développement web"],
+    "sameAs": [
+      "https://www.linkedin.com/in/steven-dieu-bb3ab69b/",
+      "https://github.com/LigoLabs"
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- ===================== ÉCRAN DE CHARGEMENT (avant tout) ===================== -->
+  <!-- Fond noir + l'orbe au centre (chargée en premier) ; le cadre doré « loader.png »
+       (même design que l'orbe : or + gemmes turquoise) TOURNE autour d'elle pendant le
+       préchargement de TOUS les assets (maps, sprites, FX) -> le jeu démarre ensuite sans
+       « pop ». Tout le mouvement est piloté en JS (rAF, donc joué même en mouvement
+       réduit) ; le % avance linéairement et l'écran reste au moins 2 s (anti-clignotement),
+       puis fondu vers l'accueil. Si tout est déjà en cache : pas de splash (voir
+       setupBootLoader). -->
+  <div id="loader" class="loader" role="status" aria-label="Chargement">
+    <div class="loader__core">
+      <img class="loader__ring-img" id="loaderRing" src="assets/orbs/loader.png?b=1" alt="" aria-hidden="true" />
+      <img class="loader__orb" id="loaderOrb" src="assets/orbs/orbe.png?b=1" alt="" />
+    </div>
+    <p class="loader__pct" id="loaderPct" aria-hidden="true">0%</p>
+  </div>
+
+  <!-- ===================== JEU (canvas) ===================== -->
+  <canvas id="game" aria-label="Jeu de plateforme portfolio"></canvas>
+
+  <!-- ===================== HUD ===================== -->
+  <div id="hud" class="hud">
+    <div class="hud__cluster">
+      <div class="hud__progress" id="progress" aria-live="polite" hidden>
+        <span class="hud__icon">✦</span>
+        <span id="progressText">0 / 0</span>
+      </div>
+      <!-- Chrono : temps de jeu, juste à droite des projets. Les points sont calculés à la fin. -->
+      <div class="hud__timer" id="timer" hidden title="Temps de jeu, le score est calculé à la fin">
+        <span class="hud__icon hud__icon--timer" aria-hidden="true">⏱</span>
+        <span id="timerText">0:00</span>
+      </div>
+      <!-- Titre de la carte en cours (Lille, Paris…), révélé à droite du chrono à chaque entrée -->
+      <div class="hud__chapter" id="chapter" aria-hidden="true">
+        <span class="hud__chapter__name" id="chapterName"></span>
+        <span class="hud__chapter__sub" id="chapterSub"></span>
+      </div>
+    </div>
+    <div class="hud__actions">
+      <button id="lbBtn" class="hud__btn hud__btn--label" type="button" aria-label="Voir le classement mondial" title="Voir le classement mondial">
+        <img class="hud__icon hud__icon--img" src="assets/ui/classement.png" alt="" aria-hidden="true" /><span class="hud__btn-txt">Classement</span>
+      </button>
+      <button id="projectsBtn" class="hud__btn hud__btn--label" type="button" aria-label="Voir tous mes projets" title="Voir tous mes projets">
+        <img class="hud__icon hud__icon--img" src="assets/ui/my-project.png" alt="" aria-hidden="true" /><span class="hud__btn-txt">Mes projets</span>
+      </button>
+      <div class="hud__audio" id="audioWrap">
+        <button id="muteBtn" class="hud__btn" type="button" aria-label="Réglage du son" aria-expanded="false" title="Son"><img class="audio-ic" src="assets/ui/volume.png" alt="" aria-hidden="true" /></button>
+        <div id="audioPanel" class="audio-panel" hidden role="group" aria-label="Réglages du son">
+          <div class="audio-row">
+            <button id="musicMute" class="audio-panel__mute" type="button" aria-label="Couper la musique" title="Musique"><img class="audio-ic" src="assets/ui/volume-musique.png" alt="" aria-hidden="true" /></button>
+            <input id="musicSlider" class="audio-panel__slider" type="range" min="0" max="100" value="60" aria-label="Volume de la musique" />
+          </div>
+          <div class="audio-row">
+            <button id="sfxMute" class="audio-panel__mute" type="button" aria-label="Couper les bruitages" title="Bruitages"><img class="audio-ic" src="assets/ui/volume-bruitage.png" alt="" aria-hidden="true" /></button>
+            <input id="sfxSlider" class="audio-panel__slider" type="range" min="0" max="100" value="80" aria-label="Volume des bruitages" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== COLLECTION (desktop) =====================
+       Une case par projet (ordre = numéro de collection). Vide = numéro ; pleine = logo.
+       Quand on referme la fiche d'un projet attrapé, sa carte vole se ranger dans sa case.
+       Cases construites en JS (buildCollectionTray) pour coller au nombre de projets. -->
+  <div id="collection" class="collection" aria-hidden="true" hidden></div>
+
+  <!-- ===================== ÉCRAN D'ACCUEIL (avant le prélude) ===================== -->
+  <!-- Présente le site (portfolio jouable), prévient qu'il y a du son, et propose
+       3 choix : couper le son, voir directement les projets, ou jouer. Le clic sur
+       « Jouer » aspire l'accueil vers le centre puis « expire » le prélude (feuille). -->
+  <div id="cover" class="overlay overlay--cover">
+    <img class="prelude__bg" src="assets/ui/prelude.png?b=1" alt="" aria-hidden="true" />
+    <div class="prelude__scrim" aria-hidden="true"></div>
+    <!-- poussière féérique : rush filmé (grains clairs sur fond noir) posé en blend
+         additif « screen » -> le noir disparaît, seuls les grains GLOW sur le décor.
+         Remplace l'ancien semis d'étoiles CSS. Boucle muette VERS L'AVANT uniquement,
+         à VITESSE CONSTANTE, refermée par fondu enchaîné (la fin se dissout dans le
+         début) : les grains vont TOUJOURS dans le même sens, sans inversion, sans à-coup
+         ni ralenti. Fenêtre dense et stable du rush -> densité régulière. Joue même en
+         mouvement réduit, comme les lucioles (déco voulue). -->
+    <video class="prelude__dust" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+      <source src="assets/video/dust-loop.webm?b=5" type="video/webm" />
+      <source src="assets/video/dust-loop.mp4?b=5" type="video/mp4" />
+    </video>
+    <!-- Étoiles/lucioles CSS retirées (demande de Steven) : la poussière vidéo
+         (.prelude__dust) est désormais le seul effet de particules de cette page. -->
+
+
+    <div class="cover__inner">
+      <p class="kicker cover__kicker">Portfolio interactif</p>
+      <h1 class="title cover__title">L'épopée de Steven&nbsp;Dieu</h1>
+      <p class="cover__lead">Je présente mes projets sous forme de jeu vidéo.<br/>Il y a du son&nbsp;: tu peux le couper juste en dessous, ou cliquer sur Jouer.</p>
+
+      <button id="coverSound" class="cover__sound" type="button" aria-pressed="true" aria-label="Activer ou couper le son">
+        <span class="cover__sound-ic" id="coverSoundIc" aria-hidden="true"><img class="audio-ic" src="assets/ui/volume.png" alt="" /></span>
+        <span class="cover__sound-tx">
+          <b id="coverSoundTitle">Son activé</b>
+          <i id="coverSoundHint">Musique et bruitages. Clique pour couper.</i>
+        </span>
+      </button>
+
+      <div class="cover__actions">
+        <button id="coverPlay" class="cover__play" type="button"><img class="play-ic" src="assets/ui/play.png" alt="" aria-hidden="true" />Jouer</button>
+        <button id="coverProjects" class="cover__see" type="button">Voir mes projets</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PRÉLUDE / ACCUEIL (mode histoire) ===================== -->
+  <div id="prelude" class="overlay overlay--prelude" hidden>
+    <!-- décor peint (si absent : repli sur le dégradé). Remplace assets/ui/prelude.png -->
+    <img class="prelude__bg" id="preludeBg" src="assets/ui/prelude.png?b=1" alt="" aria-hidden="true" />
+    <div class="prelude__scrim" aria-hidden="true"></div>
+    <!-- poussière féérique : rush filmé (grains clairs sur fond noir) posé en blend
+         additif « screen » -> le noir disparaît, seuls les grains GLOW sur le décor.
+         Remplace l'ancien semis d'étoiles CSS. Boucle muette VERS L'AVANT uniquement,
+         à VITESSE CONSTANTE, refermée par fondu enchaîné (la fin se dissout dans le
+         début) : les grains vont TOUJOURS dans le même sens, sans inversion, sans à-coup
+         ni ralenti. Fenêtre dense et stable du rush -> densité régulière. Joue même en
+         mouvement réduit, comme les lucioles (déco voulue). -->
+    <video class="prelude__dust" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+      <source src="assets/video/dust-loop.webm?b=5" type="video/webm" />
+      <source src="assets/video/dust-loop.mp4?b=5" type="video/mp4" />
+    </video>
+    <!-- Étoiles/lucioles CSS retirées (demande de Steven) : la poussière vidéo
+         (.prelude__dust) est désormais le seul effet de particules de cette page. -->
+
+
+    <div class="prelude__inner">
+      <p class="kicker prelude__kicker">Bienvenue dans</p>
+      <h1 class="title prelude__title">L'épopée de Steven&nbsp;Dieu</h1>
+      <p class="subtitle prelude__sub" id="preludeSub">Tech Lead Java / Angular · Nantes</p>
+
+      <div class="prelude__story">
+        <p class="prelude__line">Il y a bien longtemps, dans une galaxie lointaine… Non, je ne suis pas un Jedi, juste un Tech Lead passionné…</p>
+        <p class="prelude__line prelude__line--cta">…attaqué par de vilains bugs qui ont volé tous mes&nbsp;projets&nbsp;! Aide-moi à les récupérer (et&nbsp;vite&nbsp;!) pour les présenter au reste du&nbsp;monde.</p>
+      </div>
+
+      <div class="prelude__orbhint" aria-label="Ton objectif">
+        <span class="prelude__orbwrap">
+          <img class="prelude__orb" src="assets/orbs/orbe.png?b=1" alt="Une orbe-projet dorée" width="88" height="88" />
+        </span>
+        <span class="prelude__orbtxt">Ton <strong>objectif</strong> : attrape les <strong>orbes</strong>,<br/>chacune est un <strong>projet</strong> à récupérer&nbsp;!</span>
+      </div>
+
+      <button id="preludeBtn" class="prelude__btn" type="button"><img class="play-ic" src="assets/ui/play.png" alt="" aria-hidden="true" />Jouer</button>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL PROJET ===================== -->
+  <div id="modal" class="overlay overlay--modal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal__close" data-close type="button" aria-label="Fermer">✕</button>
+      <div class="modal__inner">
+
+        <!-- En-tête de carte : nom du projet + coût en orbes -->
+        <div class="modal__cardtop">
+          <div class="modal__namebar">
+            <h2 class="modal__title" id="modalTitle">Titre</h2>
+            <p class="modal__sub">
+              <span class="modal__tag" id="modalTag"></span>
+              <span class="modal__year" id="modalYear"></span>
+            </p>
+          </div>
+          <span class="modal__cost" id="modalCost" aria-hidden="true"></span>
+        </div>
+
+        <!-- Illustration : carrousel de captures, sinon vignette logo -->
+        <div class="modal__art" id="modalArt">
+          <div class="modal__artph" id="modalArtPh">
+            <div class="modal__browserbar"><i></i><i></i><i></i></div>
+            <div class="modal__orb">
+              <div class="modal__icon" id="modalIcon">✦</div>
+              <img class="modal__logo" id="modalLogo" alt="" hidden />
+            </div>
+          </div>
+          <div class="carousel" id="modalCarousel" hidden>
+            <div class="carousel__viewport">
+              <div class="carousel__track" id="carouselTrack"></div>
+              <button class="carousel__nav carousel__nav--prev" id="carouselPrev" type="button" aria-label="Capture précédente">‹</button>
+              <button class="carousel__nav carousel__nav--next" id="carouselNext" type="button" aria-label="Capture suivante">›</button>
+            </div>
+            <div class="carousel__dots" id="carouselDots" role="tablist" aria-label="Captures d'écran"></div>
+          </div>
+          <span class="modal__sheen" aria-hidden="true"></span>
+        </div>
+
+        <!-- Texte d'ambiance (description) -->
+        <p class="modal__desc" id="modalDesc"></p>
+
+        <!-- Compétences / technologies -->
+        <ul class="modal__stack" id="modalStack" aria-label="Technologies"></ul>
+
+        <a class="btn--card" id="modalLink" href="#" target="_blank" rel="noopener noreferrer" hidden>Voir le projet ↗</a>
+
+        <!-- Pied de carte : rareté + numéro de collection -->
+        <div class="modal__cardfoot">
+          <span class="modal__rarity" id="modalRarity" aria-hidden="true"></span>
+          <span class="modal__setnum" id="modalSetNum"></span>
+        </div>
+
+        <p class="modal__resume" id="modalResume" hidden></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== AGRANDISSEMENT D'UNE CAPTURE (lightbox) =====================
+       S'ouvre au clic sur le carrousel de la carte projet : la capture passe en grand
+       PAR-DESSUS la pop-up (fond assombri), avec flèches + compteur. Échap / clic dehors
+       / la croix referment et on retombe sur la carte. -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Capture agrandie" hidden>
+    <button class="lightbox__close" id="lightboxClose" type="button" aria-label="Fermer l'agrandissement">✕</button>
+    <button class="lightbox__nav lightbox__nav--prev" id="lightboxPrev" type="button" aria-label="Capture précédente">‹</button>
+    <figure class="lightbox__stage">
+      <img class="lightbox__img" id="lightboxImg" alt="" />
+    </figure>
+    <button class="lightbox__nav lightbox__nav--next" id="lightboxNext" type="button" aria-label="Capture suivante">›</button>
+    <span class="lightbox__count" id="lightboxCount" aria-hidden="true"></span>
+  </div>
+
+  <!-- ===================== ÉCRAN DE FIN / CONTACT =====================
+       Desktop : DEUX cartes peintes côte à côte (Collaboration | Classement).
+       Mobile  : les deux FUSIONNENT dans un seul cadre. Le bouton « Classement »
+       ouvre la vue plein écran #contactFull (recherche + pagination). -->
+  <div id="contact" class="overlay overlay--contact" role="dialog" aria-modal="true" aria-labelledby="contactTitle" tabindex="-1" hidden>
+    <div class="contact__deck" id="contactDeck">
+      <!-- cadre commun, affiché UNIQUEMENT en mobile (fusion des deux cartes) -->
+      <img class="contact__deck-frame" src="assets/ui/popup-vertical.png?b=1" alt="" aria-hidden="true" />
+      <button class="contact__close contact__close--deck" type="button" aria-label="Retour à l'accueil" data-close-contact></button>
+
+      <div class="contact__deck-inner">
+        <!-- ===== CARTE 1 : COLLABORATION (texte centré + 3 pastilles en bas) ===== -->
+        <section class="contact__card contact__card--collab">
+          <img class="contact__frame" src="assets/ui/popup-vertical.png?b=1" alt="" aria-hidden="true" />
+          <button class="contact__close contact__close--card" type="button" aria-label="Retour à l'accueil" data-close-contact></button>
+          <div class="contact__body contact__body--collab">
+            <div class="contact__welcome">
+              <p class="contact__kicker" id="contactKicker">Merci d'avoir joué&nbsp;!</p>
+              <h2 class="contact__title" id="contactTitle">Et si le prochain projet était le vôtre&nbsp;?</h2>
+              <p class="contact__sub" id="contactSubtitle"></p>
+            </div>
+            <ul class="contact-links" id="contactLinks"></ul>
+          </div>
+        </section>
+
+        <!-- ===== CARTE 2 : CLASSEMENT / SCORE (score mis en avant) ===== -->
+        <section class="contact__card contact__card--rank">
+          <img class="contact__frame" src="assets/ui/popup-vertical.png?b=1" alt="" aria-hidden="true" />
+          <button class="contact__close contact__close--card" type="button" aria-label="Retour à l'accueil" data-close-contact></button>
+          <div class="contact__body contact__body--rank">
+            <h2 class="contact__title">Classement</h2>
+            <div class="contact__score" id="scoreSummary">
+              <span class="contact__score-label">Score</span>
+              <span class="contact__score-value"><span id="finalScore">0</span> pts</span>
+            </div>
+
+            <form class="lb-form lb-form--stacked" id="lbForm" autocomplete="off">
+              <input id="pseudoInput" class="lb-form__input" type="text" maxlength="24" placeholder="Prénom Nom" aria-label="Prénom et nom" />
+              <button id="lbSubmit" class="lb-form__btn" type="submit">Valider</button>
+              <p class="lb-form__hint" id="lbHint" aria-live="polite"></p>
+            </form>
+
+            <p class="leaderboard__you" id="lbYou" hidden></p>
+
+            <div class="lb-loader lb-loader--mini" id="lbMiniLoader" aria-hidden="true" hidden><span class="lb-spinner"></span> Chargement du classement…</div>
+            <div class="leaderboard" id="leaderboard" hidden>
+              <ol class="leaderboard__list" id="lbList"></ol>
+            </div>
+            <p class="leaderboard__offline">Le classement mondial s'affiche dès que le jeu est en ligne.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ===== BOUTONS D'ACTION : SOUS les cartes, à l'EXTÉRIEUR des cadres, bien gros ===== -->
+    <div class="contact__footer" id="contactFooter">
+      <button id="lbOpenFull" class="contact__bigbtn contact__bigbtn--ghost" type="button"><img class="lb-ic" src="assets/ui/classement.png" alt="" aria-hidden="true" />Classement</button>
+      <button id="replayBtn" class="contact__bigbtn contact__bigbtn--play" type="button">↺ Rejouer</button>
+    </div>
+
+    <!-- ===== VUE PLEIN ÉCRAN : classement complet (recherche + pagination) =====
+         Cadre PEINT : CARRÉ (popup-square) sur desktop, PORTRAIT (popup-vertical) sur mobile.
+         Le contenu est calé dans le parchemin (.contact__full-inner) ; le ✕ est posé sur la
+         croix peinte du cadre. -->
+    <div class="contact__full" id="contactFull" hidden>
+      <picture class="contact__full-frame">
+        <source media="(max-width: 820px)" srcset="assets/ui/popup-vertical.png?b=1" />
+        <img src="assets/ui/popup-square.png?b=1" alt="" aria-hidden="true" />
+      </picture>
+      <button class="contact__close contact__close--full" id="lbFullClose" type="button" aria-label="Retour aux cartes"></button>
+      <div class="contact__full-inner">
+        <div class="contact__full-head">
+          <button class="contact__full-back" id="lbBack" type="button">‹ Retour</button>
+          <h2 class="contact__full-title" id="lbFullTitle">Classement</h2>
+        </div>
+        <input id="lbSearch" class="contact__full-search" type="search" placeholder="Rechercher un nom…" aria-label="Rechercher un nom" autocomplete="off" />
+        <p id="lbFullStatus" class="visually-hidden" role="status" aria-live="polite"></p>
+        <div class="lb-loader" id="lbLoader" aria-hidden="true" hidden><span class="lb-spinner"></span> Chargement du classement…</div>
+        <ol class="contact__full-list" id="lbFullList"></ol>
+        <p class="contact__full-empty" id="lbFullEmpty" hidden>Aucun nom ne correspond à ta recherche.</p>
+        <div class="contact__full-pager" id="lbPager">
+          <button id="lbPrev" class="contact__pager-btn" type="button" aria-label="Page précédente">‹</button>
+          <span id="lbPageInfo" class="contact__pager-info">1 / 1</span>
+          <button id="lbNext" class="contact__pager-btn" type="button" aria-label="Page suivante">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== VUE PROJETS (accès direct, sans jouer) ===================== -->
+  <div id="projects" class="overlay overlay--projects" hidden>
+    <div class="projects__backdrop" data-close-projects></div>
+    <div class="projects__panel" role="dialog" aria-modal="true" aria-labelledby="projectsTitle">
+      <!-- Cadre : PORTRAIT (popup-vertical) sur mobile/écran étroit, PAYSAGE (popup-horizontal)
+           sur desktop/écran large -> la vue projets occupe alors bien plus de largeur. -->
+      <picture class="projects__frame">
+        <source media="(min-width: 900px)" srcset="assets/ui/popup-horizontal.png?b=1" />
+        <img src="assets/ui/popup-vertical.png?b=1" alt="" />
+      </picture>
+      <button class="projects__close" id="projectsClose" type="button" aria-label="Fermer" data-close-projects></button>
+      <div class="projects__content">
+        <!-- vue LISTE -->
+        <div class="projects__view" id="projView">
+          <h2 class="projects__title" id="projectsTitle">Mes projets</h2>
+          <div class="projects__rule" aria-hidden="true"><i></i><b>◆</b><i></i></div>
+          <p class="projects__sub" id="projectsSub"></p>
+          <div class="projects__list" id="projectsGrid"></div>
+        </div>
+        <!-- vue DÉTAIL (remplie au clic sur un projet) -->
+        <div class="projects__view" id="projDetail" hidden></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== CONTRÔLES TACTILES (mobile) ===================== -->
+  <div id="touch" class="touch" hidden>
+    <div class="touch__pad">
+      <button class="touch__btn" data-act="left"  aria-label="Gauche"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6 17.5 12 8.5 18Z"/></svg></button>
+      <button class="touch__btn" data-act="right" aria-label="Droite"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6 17.5 12 8.5 18Z"/></svg></button>
+    </div>
+    <div class="touch__pad touch__pad--right">
+      <button class="touch__btn" data-act="jump" aria-label="Sauter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6 17.5 12 8.5 18Z"/></svg></button>
+      <button class="touch__btn" data-act="down" aria-label="S'accroupir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6 17.5 12 8.5 18Z"/></svg></button>
+    </div>
+  </div>
+
+  <!-- ===================== MUSIQUE D'AMBIANCE ===================== -->
+  <!-- Intro jouée une fois au lancement, puis enchaînement auto sur la boucle (jouée en continu). -->
+  <audio id="bgIntro" preload="auto" src="assets/audio/petit-prince-intro.mp3?b=1"></audio>
+  <audio id="bgLoop"  preload="auto" loop src="assets/audio/petit-prince-loop.mp3?b=1"></audio>
+  <!-- Musique du dernier niveau ("boss") : « The Last Stand ». Crossfade à l'entrée/sortie. -->
+  <audio id="bgBoss"  preload="auto" loop src="assets/audio/the-last-stand.mp3?b=1"></audio>
+  <!-- Musique de fin : jouée quand l'orbe finale est cueillie (écran de remerciement + classement). Crossfade depuis le boss. -->
+  <audio id="bgEnd"   preload="auto" loop src="assets/audio/endgame.mp3?b=1"></audio>
+
+  <script src="collisions.js?b=200"></script>
+  <script src="content.js?b=211"></script>
+  <script src="game.js?b=437"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+# --- OS / éditeurs ---
+Thumbs.db
+ehthumbs.db
+.DS_Store
+desktop.ini
+# Config projet JetBrains (réglages locaux de l'IDE, jamais sur le repo public)
+.idea/
+
+# --- Tout ce qui est lié à Claude Code / outillage MCP ---
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.claude.json
+.mcp.json
+.playwright-mcp/
+# Profils Chrome temporaires créés par les outils d'aperçu/automatisation (jamais versionner : cookies, login data…)
+.__chrome_tmp/
+
+# --- Fichiers de travail (scripts PowerShell & PNG intermédiaires) ---
+# tout fichier/dossier commençant par _ , à N'IMPORTE QUEL niveau
+_*
+# Tout PNG à la racine = scratch/scan (les PNG utiles sont dans assets/)
+/*.png
+
+# --- Références / sources non utilisées par le jeu ---
+/craftpix-bg.jpeg
+
+# Textures du jeu Rayman Origins (© Ubisoft) — matériel de référence, NON versionné
+assets/Rayman Origins (PC) Textures/
+
+# Captures, gifs et images génératives de travail
+assets/*.mp4
+assets/video/*.mp4
+# exception : poussière féérique de l'intro = asset du jeu (fallback H.264), versionné
+!assets/video/dust-loop.mp4
+assets/*.gif
+assets/ChatGPT Image*.png
+assets/5f663df7-*.png
+
+# Variantes sources « - plateforme » (le jeu charge les maps, pas ces versions)
+assets/level-* - plateforme.png
+assets/maps/level-* - plateforme.png
+
+# Sources haute résolution des maps : le jeu charge désormais assets/maps/level-N.webp
+# (≈15x plus léger). On garde les PNG en local pour ré-édition, mais on ne les versionne
+# plus (sinon ≈65 Mo inutiles dans le dépôt et déployés sur le site). On ignore les
+# sources où qu'elles soient (racine assets/ historique OU assets/maps/).
+assets/level-[0-9].png
+assets/maps/level-[0-9].png
+assets/level-*-old.png
+assets/maps/level-*-old.png
+# Archives / exports de travail dans assets/
+assets/*.zip
+
+# Dossier de travail « mouvement » (frames d'anim, références, vidéos de test) — non utilisé par le jeu
+assets/mouvement/
+
+# Pack After Effects « Smoke Elements » (source .aep + sons + vignette) — non exploité par le jeu web
+assets/2D_FX_Smoke_Elements_24_Fps_source_54836/
+
+# Rush ProRes 4K source de la poussière féérique (≈925 Mo). Le jeu charge les versions
+# web légères assets/dust-loop.webm / .mp4 (versionnées) ; on garde le .mov en local.
+assets/dust.mov
+
+# Pack source « Free Smoke Fx Pixel » — les sprites utilisés sont déjà extraits dans
+# assets/fx-jump.png / fx-land.png (eux versionnés) ; le pack brut reste local
+assets/Free Smoke Fx Pixel 2/
+
+# Pack source « Kenney Particle Pack » (CC0, ~10 Mo) — on n'en versionne que le sprite
+# extrait (assets/fx/twinkle.png = star_04) ; pack brut local, jamais commité
+assets/kenney_particlePack/
+
+# Séquences PNG exportées d'After Effects (« Anime Smoke ») — sources lourdes. Le sheet
+# final assets/fx-jump-smoke.png (lui versionné) en est extrait ; on garde l'export en local.
+assets/smoke-export/
+
+# --- Backend du classement (API serverless) ---
+node_modules/
+# stockage local du classement en dev (repli fichier JSON quand pas de Postgres)
+api/.data/
+.vercel

@@ -1,0 +1,14 @@
+{
+  "name": "stedi-leaderboard-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API serverless (Express) du classement mondial pour le portfolio jouable de Steven Dieu. Le jeu lui-même reste un site statique sans build.",
+  "scripts": {
+    "dev:api": "node api/index.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

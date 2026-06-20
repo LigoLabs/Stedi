@@ -1,0 +1,9 @@
+#!/bin/sh
+# Anti-cache automatique : bump le « ?b= » des fichiers code/assets qui partent
+# dans ce commit, puis les re-stage. Voir tools/bump-cache.js.
+# Activé via :  git config core.hooksPath tools/git-hooks
+node "$(dirname "$0")/../bump-cache.js" --hook || {
+  echo "pre-commit: bump-cache a échoué (commit annulé)." >&2
+  exit 1
+}
+exit 0

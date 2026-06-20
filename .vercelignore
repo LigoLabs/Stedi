@@ -1,0 +1,16 @@
+# ⚠️ Ce fichier n'agit QUE pour les déploiements via la CLI `vercel`.
+# Pour un déploiement connecté à GitHub, tout ce qui est dans le dépôt est publié
+# (il faudrait alors retirer ces fichiers du dépôt pour les exclure du site).
+
+# Outils de génération (collisions, sprite-sheets FX) — pas destinés au site public
+tools/
+
+# Méta dépôt & docs de dev — inutiles sur le site
+.git
+.gitattributes
+.gitignore
+.vercelignore
+LICENSE
+README.md
+LEADERBOARD.md
+assets/projets/README.md
