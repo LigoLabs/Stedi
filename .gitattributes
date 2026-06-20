@@ -1,0 +1,10 @@
+# Fins de ligne normalisées en LF dans le dépôt (CRLF conservé en local sous Windows)
+* text=auto
+
+# Fichiers binaires — aucune conversion
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.mp4  binary
+*.ico  binary

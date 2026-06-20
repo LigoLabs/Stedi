@@ -1,0 +1,309 @@
+# ==========================================================================
+#  ARRIVEES SUR LA PLATEFORME
+#  Trois facons d'arriver, combinables avec les quatre poses. La regle qui rend les
+#  12 combinaisons possibles : CHAQUE arrivee finit exactement sur REPOS, qui est aussi
+#  l'image 1 de chaque pose. Le raccord est donc exact quel que soit le couple choisi.
+#
+#  Le deplacement d'ensemble (le perso qui traverse, saute, tombe) est porte par un objet
+#  vide RACINE dont tout herite, sauf la tete qui est recollee en coordonnees monde. Les
+#  tables ci-dessous restent donc ecrites dans le repere du personnage, comme les poses.
+#
+#  Le cadre des arrivees est LARGE (sensor_fit vertical) pour que la course entre depuis
+#  hors champ sans changer le cadrage vertical : le perso garde exactement la meme taille
+#  et la meme ligne de pieds que dans les poses, ce qui est indispensable au raccord.
+# ==========================================================================
+
+# L'etat de repos, partage : fin de toute arrivee = image 1 de toute pose.
+REPOS_BODY   = ( 0.00, 2.30,   0, 1.00, 1.00)
+REPOS_HEAD   = ( 0.15,  0.00,   0,   0)
+REPOS_POINT  = ( 1.60,  2.60, 3.30,   0, -40,  10)
+REPOS_OPEN   = (-2.20,  0.55, 3.30,   0,   0,   0)
+REPOS_SHOEL  = (-1.34,  0.30, 0.00,   0,   0,   0)
+REPOS_SHOER  = ( 1.34,  0.10, 0.00,   0,   0,   0)
+
+ENTREES = {
+
+# ---------------------------------------------------------------- COURSE
+"course": dict(
+  titre="La course : il debarque en courant et derape pour s'arreter",
+  # Deplacement d'ensemble : il entre par la gauche a pleine vitesse, freine a l'image 6,
+  # DEPASSE legerement sa marque (le derapage), puis revient dessus.
+  DEPL=[
+    ( 1, -15.00, 0.00),
+    ( 2, -11.50, 0.00),
+    ( 3,  -8.00, 0.00),
+    ( 4,  -4.80, 0.00),
+    ( 5,  -2.20, 0.00),
+    ( 6,  -0.40, 0.00),   # le freinage commence
+    ( 7,   0.75, 0.00),   # il depasse sa marque
+    ( 8,   0.45, 0.00),
+    ( 9,   0.10, 0.00),
+    (10,   0.00, 0.00),
+  ],
+  BODY=[
+    ( 1,  0.55, 2.45,  10, 0.98, 1.02),   # penche en avant, foulee
+    ( 2,  0.55, 2.20,  10, 1.04, 0.96),
+    ( 3,  0.55, 2.45,  10, 0.98, 1.02),
+    ( 4,  0.55, 2.20,  10, 1.04, 0.96),
+    ( 5,  0.60, 2.42,  12, 0.98, 1.02),
+    ( 6, -0.45, 2.25, -18, 1.10, 0.90),   # freinage : il se cale en arriere, ecrase
+    ( 7, -0.55, 2.22, -22, 1.12, 0.88),   # derapage
+    ( 8, -0.10, 2.36,  -6, 1.00, 1.02),   # rebond
+    ( 9,  0.04, 2.31,  -2, 1.00, 1.00),
+    (10,) + REPOS_BODY,
+  ],
+  HEAD=[
+    ( 1,  0.35, -0.05,  -8, -10),
+    ( 2,  0.35,  0.02,  -8, -10),
+    ( 3,  0.35, -0.05,  -8, -10),
+    ( 4,  0.35,  0.02,  -8, -10),
+    ( 5,  0.38, -0.05, -10, -12),
+    ( 6,  0.05,  0.05,  12,  14),   # la tete partant en arriere au freinage
+    ( 7, -0.02,  0.06,  16,  18),
+    ( 8,  0.12,  0.01,   4,   5),
+    ( 9,  0.15,  0.00,   1,   1),
+    (10,) + REPOS_HEAD,
+  ],
+  CHOREO={
+    # Les mains pompent : en avant-haut, puis en arriere-bas, en alternance.
+    "hPoint": [
+        C( 1,  2.30, 0.30, 4.60,   0, -20,  0),
+        C( 2,  0.90, 0.90, 2.40,   0, -50,  0),
+        C( 3,  2.30, 0.30, 4.60,   0, -20,  0),
+        C( 4,  0.90, 0.90, 2.40,   0, -50,  0),
+        C( 5,  2.40, 0.25, 4.70,   0, -18,  0),
+        C( 6,  0.80, 1.00, 2.20,   0, -55,  0),   # il se rattrape au freinage
+        C( 7,  1.10, 0.95, 2.60,   0, -48,  0),
+        C( 8,  1.50, 2.20, 3.10,   0, -42,  6),
+        C( 9,  1.58, 2.50, 3.25,   0, -40,  9),
+        C(10, *REPOS_POINT),
+    ],
+    "hOpen": [
+        C( 1, -1.00, 1.10, 2.30,   0, 0, 0),
+        C( 2, -2.60, 0.50, 4.30,   0, 0, 0),
+        C( 3, -1.00, 1.10, 2.30,   0, 0, 0),
+        C( 4, -2.60, 0.50, 4.30,   0, 0, 0),
+        C( 5, -1.10, 1.05, 2.40,   0, 0, 0),
+        C( 6, -2.90, 0.45, 4.10,   0, 0, 0),
+        C( 7, -2.70, 0.48, 3.80,   0, 0, 0),
+        C( 8, -2.35, 0.52, 3.45,   0, 0, 0),
+        C( 9, -2.24, 0.55, 3.34,   0, 0, 0),
+        C(10, *REPOS_OPEN),
+    ],
+    # Foulee : un pied leve devant, l'autre pose derriere, puis les deux a plat en
+    # derapage. Le perso a des pieds flottants, on ne cherche pas le contact exact.
+    "shoeL": [
+        C( 1, -2.30, 0.30, 1.40, -18, 0, 0),
+        C( 2,  0.60, 0.30, 0.00,  14, 0, 0),
+        C( 3, -2.30, 0.30, 1.40, -18, 0, 0),
+        C( 4,  0.60, 0.30, 0.00,  14, 0, 0),
+        C( 5, -2.40, 0.30, 1.30, -20, 0, 0),
+        C( 6, -2.60, 0.30, 0.00, -26, 0, 0),   # le pied part devant, a plat : derapage
+        C( 7, -2.30, 0.30, 0.00, -22, 0, 0),
+        C( 8, -1.60, 0.30, 0.00,  -8, 0, 0),
+        C( 9, -1.38, 0.30, 0.00,  -2, 0, 0),
+        C(10, *REPOS_SHOEL),
+    ],
+    "shoeR": [
+        C( 1,  0.70, 0.10, 0.00,  16, 0, 0),
+        C( 2, -2.10, 0.10, 1.35, -16, 0, 0),
+        C( 3,  0.70, 0.10, 0.00,  16, 0, 0),
+        C( 4, -2.10, 0.10, 1.35, -16, 0, 0),
+        C( 5,  0.80, 0.10, 0.00,  18, 0, 0),
+        C( 6,  1.90, 0.10, 0.00,  22, 0, 0),   # l'autre pied freine derriere
+        C( 7,  1.80, 0.10, 0.00,  20, 0, 0),
+        C( 8,  1.50, 0.10, 0.00,   8, 0, 0),
+        C( 9,  1.37, 0.10, 0.00,   2, 0, 0),
+        C(10, *REPOS_SHOER),
+    ],
+  },
+),
+
+# ---------------------------------------------------------------- SAUT
+"saut": dict(
+  titre="Le grand saut : il arrive du haut a gauche de l'ecran et encaisse",
+  # GRAND saut, pas un sautillement : il entre par le coin HAUT-GAUCHE du cadre, en fin
+  # de trajectoire. On voit le sommet passer aux images 2-3, puis la chute s'accelere
+  # comme une vraie parabole (les ecarts grandissent : 0.8, 2.4, 3.8, 4.7, 4.7, 2.2).
+  # Depart a x=-15 et z=18 : le cadre des arrivees va de -15.84 a 15.84 en x et jusqu'a
+  # 28.28 en z, il entre donc en mordant le bord, ce qui se lit comme un hors-champ.
+  DEPL=[
+    ( 1, -15.00, 18.00),
+    ( 2, -12.60, 18.60),   # il finit de monter
+    ( 3, -10.20, 17.80),   # sommet passe
+    ( 4,  -7.90, 15.40),
+    ( 5,  -5.70, 11.60),
+    ( 6,  -3.60,  6.90),
+    ( 7,  -1.60,  2.20),
+    ( 8,   0.35,  0.00),   # contact
+    ( 9,   0.12,  0.85),   # rebond
+    (10,   0.00,  0.00),
+  ],
+  BODY=[
+    ( 1,  0.35, 2.30,  10, 1.04, 0.96),   # ramasse, penche en avant
+    ( 2,  0.30, 2.28,   9, 1.03, 0.97),
+    ( 3,  0.20, 2.32,   6, 1.00, 1.00),   # au sommet il se deplie
+    ( 4,  0.05, 2.42,   0, 0.94, 1.07),
+    ( 5, -0.10, 2.50,  -6, 0.90, 1.12),   # etire, il pique vers le sol
+    ( 6, -0.18, 2.54,  -9, 0.88, 1.14),
+    ( 7, -0.15, 2.50,  -7, 0.90, 1.12),
+    ( 8,  0.15, 1.90,   5, 1.26, 0.74),   # IMPACT : gros ecrasement
+    ( 9,  0.03, 2.48,  -2, 0.93, 1.08),   # rebond
+    (10,) + REPOS_BODY,
+  ],
+  HEAD=[
+    ( 1,  0.22, -0.04,  -6,  -8),
+    ( 2,  0.22, -0.04,  -6,  -8),
+    ( 3,  0.20, -0.02,  -4,  -6),
+    ( 4,  0.18,  0.02,  -1,  -2),
+    ( 5,  0.15,  0.08,   3,   4),
+    ( 6,  0.13,  0.10,   5,   6),
+    ( 7,  0.14,  0.08,   4,   5),
+    ( 8,  0.20, -0.22, -10, -12),   # elle plonge dans les epaules a l'impact
+    ( 9,  0.16,  0.09,   3,   4),
+    (10,) + REPOS_HEAD,
+  ],
+  CHOREO={
+    "hPoint": [
+        C( 1,  2.70, 0.40, 5.60,   0, -20,  0),   # bras ecartes, il plane
+        C( 2,  2.85, 0.38, 5.90,   0, -18,  0),
+        C( 3,  2.90, 0.38, 6.00,   0, -17,  0),
+        C( 4,  2.80, 0.40, 5.70,   0, -20,  0),
+        C( 5,  2.55, 0.44, 5.00,   0, -26,  0),
+        C( 6,  2.30, 0.48, 4.30,   0, -30,  0),
+        C( 7,  2.15, 0.50, 3.90,   0, -33,  0),
+        C( 8,  2.55, 0.46, 2.20,   0, -30,  0),   # les mains encaissent, elles chutent
+        C( 9,  1.80, 2.10, 3.05,   0, -40,  5),
+        C(10, *REPOS_POINT),
+    ],
+    "hOpen": [
+        C( 1, -3.05, 0.45, 5.50,   0, 0, 0),
+        C( 2, -3.20, 0.42, 5.80,   0, 0, 0),
+        C( 3, -3.25, 0.42, 5.90,   0, 0, 0),
+        C( 4, -3.15, 0.45, 5.60,   0, 0, 0),
+        C( 5, -2.90, 0.47, 4.90,   0, 0, 0),
+        C( 6, -2.70, 0.49, 4.20,   0, 0, 0),
+        C( 7, -2.55, 0.50, 3.85,   0, 0, 0),
+        C( 8, -2.95, 0.50, 2.10,   0, 0, 0),
+        C( 9, -2.35, 0.53, 3.15,   0, 0, 0),
+        C(10, *REPOS_OPEN),
+    ],
+    "shoeL": [
+        C( 1, -1.70, 0.30, 1.90, -12, 0, 0),   # jambes ramenees sous lui
+        C( 2, -1.65, 0.30, 2.10, -10, 0, 0),
+        C( 3, -1.62, 0.30, 2.15,  -9, 0, 0),
+        C( 4, -1.62, 0.30, 1.95, -11, 0, 0),
+        C( 5, -1.64, 0.30, 1.40, -15, 0, 0),   # elles se tendent vers le sol
+        C( 6, -1.66, 0.30, 0.70, -19, 0, 0),
+        C( 7, -1.66, 0.30, 0.15, -21, 0, 0),
+        C( 8, -1.95, 0.30, 0.00, -16, 0, 0),   # ecrasees et ecartees a l'impact
+        C( 9, -1.48, 0.30, 0.06,  -6, 0, 0),
+        C(10, *REPOS_SHOEL),
+    ],
+    "shoeR": [
+        C( 1,  1.66, 0.10, 1.85,  13, 0, 0),
+        C( 2,  1.61, 0.10, 2.05,  11, 0, 0),
+        C( 3,  1.58, 0.10, 2.10,  10, 0, 0),
+        C( 4,  1.58, 0.10, 1.90,  12, 0, 0),
+        C( 5,  1.60, 0.10, 1.35,  16, 0, 0),
+        C( 6,  1.62, 0.10, 0.65,  20, 0, 0),
+        C( 7,  1.62, 0.10, 0.12,  22, 0, 0),
+        C( 8,  1.90, 0.10, 0.00,  17, 0, 0),
+        C( 9,  1.46, 0.10, 0.05,   6, 0, 0),
+        C(10, *REPOS_SHOER),
+    ],
+  },
+),
+
+# ---------------------------------------------------------------- CHUTE
+"chute": dict(
+  titre="La chute : il tombe du ciel, s'ecrase et se remet d'aplomb",
+  DEPL=[
+    ( 1,  0.60, 17.00),
+    ( 2,  0.40, 12.50),
+    ( 3,  0.20,  7.50),
+    ( 4,  0.10,  3.00),
+    ( 5,  0.00,  0.20),   # contact
+    ( 6,  0.00,  0.00),   # ecrasement
+    ( 7,  0.00,  0.90),   # rebond
+    ( 8,  0.00,  0.10),
+    ( 9,  0.00,  0.15),
+    (10,  0.00,  0.00),
+  ],
+  BODY=[
+    ( 1, -0.20, 2.55,  -6, 0.88, 1.14),   # etire par la chute
+    ( 2, -0.15, 2.60,  -4, 0.86, 1.16),
+    ( 3, -0.10, 2.62,  -2, 0.85, 1.17),
+    ( 4, -0.05, 2.60,   0, 0.86, 1.16),
+    ( 5,  0.00, 2.35,   0, 1.05, 0.96),
+    ( 6,  0.00, 1.80,   0, 1.30, 0.68),   # IMPACT : ecrasement maximal
+    ( 7,  0.00, 2.55,   0, 0.90, 1.12),   # il rebondit et s'etire
+    ( 8,  0.00, 2.22,   0, 1.08, 0.94),   # deuxieme oscillation, plus faible
+    ( 9,  0.00, 2.34,   0, 0.98, 1.02),
+    (10,) + REPOS_BODY,
+  ],
+  HEAD=[
+    ( 1,  0.15,  0.10,   0,   0),
+    ( 2,  0.15,  0.12,   0,   0),
+    ( 3,  0.15,  0.14,   0,   0),
+    ( 4,  0.15,  0.12,   0,   0),
+    ( 5,  0.15, -0.05,   0,   0),
+    ( 6,  0.15, -0.28,   0,   0),   # la tete s'enfonce dans les epaules
+    ( 7,  0.15,  0.16,   0,   0),
+    ( 8,  0.15, -0.06,   0,   0),
+    ( 9,  0.15,  0.03,   0,   0),
+    (10,) + REPOS_HEAD,
+  ],
+  CHOREO={
+    # Bras en l'air pendant la chute : le geste universel de celui qui tombe.
+    "hPoint": [
+        C( 1,  2.40, 0.40, 7.60,   0, -16,  0),
+        C( 2,  2.50, 0.38, 7.90,   0, -14,  0),
+        C( 3,  2.45, 0.38, 8.00,   0, -15,  0),
+        C( 4,  2.40, 0.40, 7.70,   0, -18,  0),
+        C( 5,  2.20, 0.45, 6.20,   0, -26,  0),
+        C( 6,  2.60, 0.50, 2.00,   0, -34,  0),   # elles s'ecrasent vers le bas
+        C( 7,  2.10, 0.48, 4.60,   0, -38,  0),
+        C( 8,  1.75, 0.52, 3.00,   0, -40,  4),
+        C( 9,  1.62, 0.54, 3.22,   0, -40,  9),
+        C(10, *REPOS_POINT),
+    ],
+    "hOpen": [
+        C( 1, -2.80, 0.45, 7.50,   0, 0, 0),
+        C( 2, -2.90, 0.42, 7.80,   0, 0, 0),
+        C( 3, -2.85, 0.42, 7.95,   0, 0, 0),
+        C( 4, -2.80, 0.45, 7.60,   0, 0, 0),
+        C( 5, -2.60, 0.48, 6.10,   0, 0, 0),
+        C( 6, -3.00, 0.50, 1.90,   0, 0, 0),
+        C( 7, -2.55, 0.50, 4.50,   0, 0, 0),
+        C( 8, -2.30, 0.53, 3.00,   0, 0, 0),
+        C( 9, -2.22, 0.55, 3.24,   0, 0, 0),
+        C(10, *REPOS_OPEN),
+    ],
+    "shoeL": [
+        C( 1, -1.20, 0.30, 0.90, -10, 0, 0),
+        C( 2, -1.18, 0.30, 0.80,  -8, 0, 0),
+        C( 3, -1.20, 0.30, 0.70,  -8, 0, 0),
+        C( 4, -1.25, 0.30, 0.45, -10, 0, 0),
+        C( 5, -1.30, 0.30, 0.10, -14, 0, 0),
+        C( 6, -2.05, 0.30, 0.00, -22, 0, 0),   # les pieds giclent sur le cote a l'impact
+        C( 7, -1.70, 0.30, 0.12, -12, 0, 0),
+        C( 8, -1.44, 0.30, 0.00,  -4, 0, 0),
+        C( 9, -1.36, 0.30, 0.00,  -1, 0, 0),
+        C(10, *REPOS_SHOEL),
+    ],
+    "shoeR": [
+        C( 1,  1.20, 0.10, 0.85,  11, 0, 0),
+        C( 2,  1.18, 0.10, 0.75,   9, 0, 0),
+        C( 3,  1.20, 0.10, 0.65,   9, 0, 0),
+        C( 4,  1.25, 0.10, 0.40,  11, 0, 0),
+        C( 5,  1.30, 0.10, 0.08,  15, 0, 0),
+        C( 6,  2.00, 0.10, 0.00,  23, 0, 0),
+        C( 7,  1.68, 0.10, 0.10,  13, 0, 0),
+        C( 8,  1.43, 0.10, 0.00,   4, 0, 0),
+        C( 9,  1.36, 0.10, 0.00,   1, 0, 0),
+        C(10, *REPOS_SHOER),
+    ],
+  },
+),
+}
